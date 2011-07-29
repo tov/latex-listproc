@@ -1,0 +1,1199 @@
+% \iffalse meta-comment
+%
+% Copyright (C) 2011 by Jesse A. Tov <tov@ccs.neu.edu>
+% ----------------------------------------------------
+% 
+% This file may be distributed and/or modified under the
+% conditions of the LaTeX Project Public License, either version 1.2
+% of this license or (at your option) any later version.
+% The latest version of this license is in:
+%
+%    http://www.latex-project.org/lppl.txt
+%
+% and version 1.2 or later is part of all distributions of LaTeX 
+% version 1999/12/01 or later.
+%
+% ------------------------------------------------------------------
+% This is a LaTeX package to make it easy to refer to nested labels
+% using both an outer number (such as a theorem number) and an inner
+% number (such as an item in an enumeration).
+% ------------------------------------------------------------------
+%
+%   *** The package file:
+%<package>\NeedsTeXFormat{LaTeX2e}[1999/12/01]
+%<package>\ProvidesPackage{listproc}[2011/03/26 v0.1 (list processing)]
+%
+%   *** The driver file:
+%<driver>\NeedsTeXFormat{LaTeX2e}
+%
+%   *** date, version, and stuff:
+%\fi
+%\ProvidesFile{listproc}[2011/03/26 v0.1 (list processing)]
+% \changes{v0.1}{2011/03/26}{Initial documented release}
+%
+% \CheckSum{0}
+% \CharacterTable
+%  {Upper-case    \A\B\C\D\E\F\G\H\I\J\K\L\M\N\O\P\Q\R\S\T\U\V\W\X\Y\Z
+%   Lower-case    \a\b\c\d\e\f\g\h\i\j\k\l\m\n\o\p\q\r\s\t\u\v\w\x\y\z
+%   Digits        \0\1\2\3\4\5\6\7\8\9
+%   Exclamation   \!     Double quote  \"     Hash (number) \#
+%   Dollar        \$     Percent       \%     Ampersand     \&
+%   Acute accent  \'     Left paren    \(     Right paren   \)
+%   Asterisk      \*     Plus          \+     Comma         \,
+%   Minus         \-     Point         \.     Solidus       \/
+%   Colon         \:     Semicolon     \;     Less than     \<
+%   Equals        \=     Greater than  \>     Question mark \?
+%   Commercial at \@     Left bracket  \[     Backslash     \\
+%   Right bracket \]     Circumflex    \^     Underscore    \_
+%   Grave accent  \`     Left brace    \{     Vertical bar  \|
+%   Right brace   \}     Tilde         \~}
+%
+% \iffalse
+%
+%<*driver>
+\documentclass{ltxdoc}
+\usepackage{listproc} \relax
+\usepackage{hypdoc}
+\EnableCrossrefs
+\CodelineIndex
+\RecordChanges
+\begin{document}
+  \DocInput{listproc.dtx}
+  \PrintChanges
+  \setcounter{IndexColumns}{2}
+  \PrintIndex
+\end{document}
+%</driver>
+% \fi
+%
+% \GetFileInfo{listproc}
+%
+% \DoNotIndex{\newcommand,\newenvironment,\def,\relax,\do,\@gobble}
+% \DoNotIndex{\if,\ifx,\else,\fi,\providecommand,\let,\global,\ignorespaces}
+% \DoNotIndex{\@undefined,\expandafter,\@for,\@ifnextchar,\addtolength}
+% \DoNotIndex{\aftergroup,\begin,\dp,\ht,\wd,\end,\ifdim}
+% \DoNotIndex{\@firstoftwo,\@secondoftwo,\@notfound,\@tester}
+% \DoNotIndex{\addtocounter,\advance,\edef,\empty,\gdef,\ifnum}
+% \DoNotIndex{\long,\newcounter,\renewcommand,\setcounter,\the,\toksdef}
+% \DoNotIndex{\value,\xdef}
+% 
+% {\catcode`\|=0 \catcode`\\=12
+%  |gdef|bslash{\}}
+% \makeatletter\relax
+% \newcommand{\usemacro}[2][altusage]{\relax
+%   \texttt{\bslash#2}\relax
+%   \indexmacro[#1]{#2}\relax
+% }
+% \newcommand{\defmacro}[2][usage]{\relax
+%   \usemacro[#1]{#2}\relax
+% }
+% \newcommand{\indexmacro}[2][usage]{\relax
+%   \index{#2=\string\verb!*+\bslash#2+\string|#1}\relax\iffalse!\fi
+% }
+% \newcommand{\altusage}[1]{\emph{(#1)}}
+%
+% {
+% \makeatletter
+% \global\let\doc@old@tabular\tabular
+% \global\def\doctabular{\begingroup\catcode`\|=12\relax\doc@tabular}
+% \global\def\doc@tabular#1{\endgroup\doc@old@tabular{#1}}
+% }
+% \let\enddoctabular\endtabular
+% 
+% {
+% \catcode`\|=12\relax
+% \newenvironment{decl}
+%     {\leavevmode\trivlist\item
+%      \begin{tabular}{|l|l|}\hline\ignorespaces}
+%     {\\\hline\end{tabular}\endtrivlist}
+% \global\let\decl\decl
+% \global\let\enddecl\enddecl
+% }
+%
+% \newcounter{macrosenv}
+% \newenvironment{macros}[1]
+%   {\setcounter{macrosenv}{0}
+%    \@for\@each@macro:=#1\do{
+%      \addtocounter{macrosenv}{1}
+%      \expandafter\macro\expandafter{\csname\@each@macro\endcsname}
+%    }}
+%   {\@whilenum\value{macrosenv}>0\do{
+%      \addtocounter{macrosenv}{-1}
+%      \endmacro
+%    }}
+%
+% \title{The \textsf{listproc} package}
+% \author{Jesse A. Tov \\ \texttt{tov@ccs.neu.edu}}
+% \date{This document
+%   corresponds to \textsf{\filename}~\fileversion, dated \filedate.}
+% 
+% \maketitle
+%
+% \tableofcontents
+%
+% \section{Introduction}
+%
+% The purpose of this package is to support programming with lists,
+% including higher-order programming with \emph{map} and \emph{sort}.
+%
+% We use a representation of lists suggested in \emph{The \TeX{}book}.
+% A list of elements \meta{toks}$_1$, \meta{toks}$_2$,
+% \ldots \meta{toks}$_k$ is
+% represented as a macro that expands to
+% \begin{quote}
+% |\listitem{|\meta{toks}$_1$|}\listitem{|\meta{toks}$_2$|}|
+% \ldots
+% |\listitem{|\meta{toks}$_k$|}|
+% \end{quote}
+% It is easy to iterate over such a list by defining \defmacro{listitem}
+% to do whatever should happen to each item in the list and then
+% evaluating the list. (The empty list is represented by the empty macro,
+% which may be written \usemacro{empty}.)
+% 
+% \section{Command Reference}
+%
+% \subsection{List Definition}
+%
+% \begin{decl}
+%   \defmacro{newlist} \marg{dst-list} \marg{csv} \\
+%   \hline
+%   \defmacro{renewlist} \marg{dst-list} \marg{csv} \\
+%   \hline
+%   \defmacro{deflist} \marg{dst-list} \marg{csv} \\
+%   \hline
+%   \defmacro{gdeflist} \marg{dst-list} \marg{csv}
+% \end{decl}
+% Define \meta{dst-list} to be a list whose contents are \meta{csv},
+% where \meta{csv} is a comma-separated list.  This is mostly useful for
+% handling input from user macros.
+% These differ on how they handle (re)definition: |\newlist| requires
+% that \meta{dst-list} not be defined, whereas |\renewlist| requires
+% that it be defined already.  Neither |\deflist| or |\gdeflist| cares
+% whether \meta{dst-list} is defined, as both will overwrite it if
+% necessary; |\gdeflist| does the definition globally.
+%
+% \subsection{Basic Imperative List Commands}
+% Most commands work by destructively updating a list. For a functional
+% interface, see \S\ref{sect:listexp}.
+% \begin{decl}
+%   \defmacro{ConsTo} \marg{item} \marg{list-macro} \\
+%   \hline
+%   \defmacro{gConsTo} \marg{item} \marg{list-macro} \\
+%   \hline
+%   \defmacro{eConsTo} \marg{item} \marg{list-macro} \\
+%   \hline
+%   \defmacro{xConsTo} \marg{item} \marg{list-macro}
+% \end{decl}
+% Add \meta{item} to the beginning of the list in \meta{list-macro},
+% destructively updating \meta{list-macro}.
+% |\ConsTo| and |\eConsTo| make the change locally to the current group,
+% whereas |\gConsTo| and |\xConsTo| do a global update.
+% |\ConsTo| and |\gConsTo| do not expand \meta{item} before adding it to
+% the list, whereas |\eConsTo| and |\xConsTo| do expand \meta{item}.
+%
+% \begin{decl}
+%   \defmacro{SnocTo} \marg{item} \marg{list-macro} \\
+%   \hline
+%   \defmacro{gSnocTo} \marg{item} \marg{list-macro} \\
+%   \hline
+%   \defmacro{eSnocTo} \marg{item} \marg{list-macro} \\
+%   \hline
+%   \defmacro{xSnocTo} \marg{item} \marg{list-macro}
+% \end{decl}
+% Add \meta{item} to the \emph{end} of the list in \meta{list-macro},
+% destructively updating \meta{list-macro}.
+% These are local or global, and expanding or non-expanding, as
+% with the |\ConsTo| variants.
+%
+% \begin{decl}
+%   \defmacro{AppendTo} \marg{src-list} \marg{dst-list} \\
+%   \hline
+%   \defmacro{gAppendTo} \marg{src-list} \marg{dst-list}
+% \end{decl}
+% Append \meta{src-list} to \meta{dst-list}, leaving the result in
+% \meta{dst-list}. As above, the |\gAppendTo| variant makes the change
+% globally.
+%
+% \begin{decl}
+%   \defmacro{LopTo} \marg{src-list} \marg{dst} \\
+%   \hline
+%   \defmacro{gLopTo} \marg{src-list} \marg{dst} \\
+%   \hline
+%   \defmacro{glLopTo} \marg{src-list} \marg{dst} \\
+%   \hline
+%   \defmacro{lgLopTo} \marg{src-list} \marg{dst}
+% \end{decl}
+% Remove the first element of \meta{src-list} and put it in \meta{dst}.
+% If \meta{src-list} is empty, this is an error.
+% These differ on the scope of the change:
+% \begin{description}
+%   \item[\tt\bslash LopTo] Both \meta{src-list} and \meta{dst} are
+%   changed locally.
+%   \item[\tt\bslash gLopTo] Both \meta{src-list} and \meta{dst} are
+%   changed globally.
+%   \item[\tt\bslash glLopTo] \meta{src-list} is changed globally 
+%             and \meta{dst} is changed locally.
+%   \item[\tt\bslash lgLopTo] \meta{src-list} is changed locally
+%             and \meta{dst} is changed globally .
+% \end{description}
+%
+% \begin{decl}
+%   \defmacro{FirstTo} \marg{src-list} \marg{dst} \\
+%   \hline
+%   \defmacro{gFirstTo} \marg{src-list} \marg{dst}
+% \end{decl}
+% Place the first element of \meta{src-list} in \meta{dst} without
+% changing \meta{src-list}.  The |\gFirstTo| variant makes the change
+% globally.
+%
+% \begin{decl}
+%   \defmacro{RestTo} \marg{src-list} \marg{dst-list} \\
+%   \hline
+%   \defmacro{gRestTo} \marg{src-list} \marg{dst-list}
+% \end{decl}
+% Place all but the first element of \meta{src-list} in \meta{dst-list} without
+% changing \meta{src-list}.  The |\gLastTo| variant makes the change
+% globally.
+%
+% \subsection{Control and Higher-Order List Commands}
+%
+% \begin{decl}
+%   \defmacro{IfList} \marg{cs} \marg{then} \marg{else}
+% \end{decl}
+% Tests whether \meta{cs}, which must be a control sequence, looks like
+% a non-empty list. If so, it does \meta{then}, and otherwise it does
+% \meta{else}.  The control sequence \meta{cs} ``looks like a non-empty
+% list'' if its expansion starts with |\listitem|.
+%
+% \begin{decl}
+%   \defmacro{@forList}\meta{cs}|:=|\meta{list}\usemacro{do}\marg{body}
+% \end{decl}
+% Iterate over \meta{list}, running \meta{body} with \meta{cs} set
+% to each element.
+%
+% \begin{decl}
+%   \defmacro{SetToListLength} \marg{list} \marg{dst}
+% \end{decl}
+% Define \meta{dst} to be the length of \meta{list}.
+%
+% \begin{decl}
+%   \defmacro{MapListTo} \marg{each-expr} \marg{src-list} \marg{dst-list}
+%   \\
+%   \hline
+%   \defmacro{gMapListTo} \marg{each-expr} \marg{src-list} \marg{dst-list}
+% \end{decl}
+% Map \meta{each-expr} over \meta{src-list}, storing the result in
+% \meta{dst-list}.
+% \meta{each-expr} is not a command, but an expression that uses |#1| to
+% refer to the list element. For example, to make every element of list
+% |\lst| bold, storing the result bad to |\lst|, we could write:
+% \begin{quote}
+%       |\MapListTo{\textbf{#1}}\lst\lst|
+% \end{quote}
+%
+% \begin{decl}
+%   \defmacro{MapAndAppendTo} \marg{each-expr} \marg{src-list} \marg{dst-list}
+%   \\
+%   \hline
+%   \defmacro{gMapAndAppendTo} \marg{each-expr} \marg{src-list} \marg{dst-list}
+% \end{decl}
+% Like |\MapListTo| and |\gMapListTo|, but appends the results of
+% mapping to the end of \meta{dst-list} rather than overwriting it
+% entirely.
+%
+% \begin{decl}
+%   \defmacro{SortList} \oarg{key} \marg{list}
+% \end{decl}
+% Sort the list \meta{list}, putting the result back into \meta{list}.
+% By default, this sorts a list of integers. To sort a list with other
+% contents, use \meta{key} to supply a command to extract integer keys
+% from each element. (We currently don't allow supplying an arbitrary
+% comparison, but require a map from list elements to the integers.)
+% Since \meta{key} is given each element as a single argument, it may
+% need to go to a bit of trouble to split them up. For example, suppose
+% we have a list of words and page numbers, perhaps for an index:
+% \begin{verbatim}
+%    \def\lst{\listitem{{\IfList}{3}}%
+%             \listitem{{\SortList}{5}}%
+%             \listitem{{\MapList}{4}}}
+% \end{verbatim}
+% Then to sort, we need a function that extracts the page numbers.
+% However, the \meta{key} will be called with arguments like
+% |{{\SortList}{5}}|, so it will need to unpack each item and then
+% select the right thing:
+% \begin{verbatim}
+%    \def\getkey#1{\@secondoftwo#1}
+%    \SortList[\getkey]\lst
+% \end{verbatim}
+% Note that it would not be sufficient to use \usemacro{@secondoftwo}
+% directly, since it expects two arguments but \meta{key} gets only one.
+%
+% \begin{decl}
+%   \defmacro{CompressList} \oarg{key} \marg{list}
+% \end{decl}
+%
+% Combines adjacent elements with adjacent keys into ranges and drops
+% elements with duplicate keys.  For this to work properly, the list
+% should (usually) already be sorted.
+%
+% If no \meta{key} is given, then like
+% |\SortList|, it works on lists of integers. For example, given the
+% list
+% \begin{quote}
+% |\listitem{3}\listitem{4}\listitem{4}\listitem{5}\listitem{7}|,
+% \end{quote}
+% it produces the list
+% \begin{quote}
+% |\listitem{@\range{3}{5}}\listitem{@\single{7}}|.
+% \end{quote}
+% The macros \usemacro{@range} and \usemacro{@single} to indicate what
+% is a single item and what is a range. To use such a list, usually one
+% would redefine those macros to do the right thing in the particular
+% instance.
+%
+% If \meta{key} is given, it is used, like in |\SortList|, to extract
+% integer keys from the list elements.  Note that when ranges are compressed,
+% intermediate elements are lost.
+%
+% \subsection{Nice List Printing}
+%
+% This subsection describes a utility for presenting lists of things
+% in typeset text:
+% \begin{decl}
+%   \defmacro{FormatList} \marg{sing} \marg{pl} \marg{fmt} \marg{csv}
+% \end{decl}
+% Format the comma-separated list in \meta{csv}, formatting each item
+% with \meta{fmt} and introducing the list with \meta{sing} if it has
+% only one item, or \meta{pl} if it has more than one.  Uses the
+% separators defined below.  For example:
+%
+% \begin{center}
+%   \begin{doctabular}{|l|l|}
+%       \hline
+%       \emph{To get\ldots} & \emph{type\ldots} \\
+%       \hline
+%       \FormatList{the letter~}{letters~}{}{A} &
+%       |\FormatList{the letter~}{letters~}{}{A}| \\
+% \iffalse
+%       \FormatList{the letter~}{letters~}{\emph}{A,B} &
+%       |\FormatList{the letter~}{letters~}{\emph}{A,B}| \\
+%       \FormatList{the letter~}{letters~}{}{A,B,C} &
+%       |\FormatList{the letter~}{letters~}{}{A,B,C}| \\
+% \fi
+%       \hline
+%   \end{doctabular}
+% \end{center}
+% The commas, spacing, and word ``and'' are determined by three macros:
+%
+% \begin{decl}
+%   \defmacro{FormatListSepTwo}
+% \end{decl}
+% Separates the two items of a two-item list.
+% Initial definition is |{ and }|.
+%
+% \begin{decl}
+%   \defmacro{FormatListSepMore}
+% \end{decl}
+% Separates all but the last two items of a more-than-two--item list.
+% Initial definition is |{, }|.
+%
+% \begin{decl}
+%   \defmacro{FormatListSepLast}
+% \end{decl}
+% Separates the last two items of a more-than-two--item list.
+% Initial definition is |{, and }|.
+%
+% \subsection{Functional List Expressions}
+% \label{sect:listexp}
+%
+% We define a tiny, domain-specific language for writing
+% \emph{functional list expressions}. Rather than write a sequence of
+% imperative list commands, it's possible to compose an operation from
+% several functional list operations.
+%
+% \begin{decl}
+%   \defmacro{ListExpr} \marg{list-expr} \\
+%   \hline
+%   \defmacro{ListExprTo} \marg{list-expr} \marg{dst-list} \\
+%   \hline
+%   \defmacro{gListExprTo} \marg{list-expr} \marg{dst-list}
+% \end{decl}
+% Evaluate the list expression \meta{list-expr}.  The first,
+% |\ListExpr|, then evaluates the resulting list in place, in the document.
+% The other two define \meta{dst-list} to be the result.  List
+% expressions are built out of several list functions that are not
+% defined generally, but only available inside of \meta{list-expr}.
+% Here is the syntax of list expressions:
+%
+% \medskip
+% \begin{doctabular}{rl@{\quad}l}
+%    \meta{list-expr} ::= & \meta{list-cs} & (a list macro) \\
+%                 $\vert$ & \defmacro{Nil} & (the empty list) \\
+%                 $\vert$ & \defmacro{List} \marg{csv} & (a comma-separated list) \\
+%                 $\vert$ & \defmacro{Q} \marg{text} & (a list element) \\
+%                 $\vert$ & \defmacro{Cons} \marg{list-expr} \marg{list-expr}
+%                         & (like |\ConsTo|) \\
+%                 $\vert$ & \defmacro{Snoc} \marg{list-expr} \marg{list-expr}
+%                         & (like |\SnocTo|) \\
+%                 $\vert$ & \defmacro{Append} \marg{list-expr} \marg{list-expr}
+%                         & (like |\AppendTo|) \\
+%                 $\vert$ & \defmacro{First} \marg{list-expr}
+%                         & (like |\FirstTo|) \\
+%                 $\vert$ & \defmacro{Rest} \marg{list-expr}
+%                         & (like |\RestTo|) \\
+%                 $\vert$ & \defmacro{Map} \marg{each-expr} \marg{list-expr}
+%                         & (like |\MapListTo|) \\
+%                 $\vert$ & \defmacro{Sort} \oarg{key} \marg{list-expr}
+%                         & (like |\SortList|) \\
+%                 $\vert$ & \defmacro{Compress} \oarg{key} \marg{list-expr}
+%                         & (like |\CompressList|) \\
+%                 $\vert$ & \meta{text} &
+%                           (arbitrary list element)
+% \end{doctabular}
+%
+% For example, we can sort and range-compress a comma-separated list,
+% and then print it as an |itemize| list with en dashes for ranges, like
+% this:
+% \begin{verbatim}
+% \let\listitem\item
+% \let\@single\relax
+% \def\@range#1#2{#1--#2}
+% \begin{itemize}
+%   \ListExpr{\Compress{\Sort{\Cons{4}{\List{2,3,7,9,7,2,5}}}}}
+% \end{itemize}
+% \end{verbatim}
+% Here is the result:
+% \begin{quote}
+% {
+% \let\listitem\item
+% \let\@single\relax
+% \def\@range#1#2{#1--#2}
+% \begin{itemize}
+%   \ListExpr{\Compress{\Sort{\Cons{4}{\List{2,3,7,9,7,2,5}}}}}
+% \end{itemize}
+% }
+% \end{quote}
+%
+% \StopEventually{}
+%
+% \section{Implementation}
+%
+% \subsection{List Definition}
+% \begin{macros}{newlist,renewlist,deflist,gdeflist}
+% The list defining commands are all defined in terms of the lower-level
+% |\@lstp@def|, which takes two extra arguments---the first specifies
+% whether the definition should be |\global|, and the second is the
+% command to use to make the original definition.
+%    \begin{macrocode}
+\newcommand\newlist{\@lstp@def{}\newcommand}
+\newcommand\renewlist{\@lstp@def{}\renewcommand}
+\newcommand\deflist{\@lstp@def{}\def}
+\newcommand\gdeflist{\@lstp@def\global\def}
+%    \end{macrocode}
+% \end{macros}
+% \begin{macros}{@lstp@def}
+% The low-level list defining command:
+%    \begin{macrocode}
+\newcommand\@lstp@def[4]{%
+%    \end{macrocode}
+% Initialize the output macro to empty, using |#2|, which is the
+% requested defining command:
+%    \begin{macrocode}
+  #2#3{}%
+%    \end{macrocode}
+% Iterate through the comma-separated list, adding elements to the end
+% of the output macro:
+%    \begin{macrocode}
+  \@for\lstp@def@temp:=#4\do{%
+    \eSnocTo\lstp@def@temp#3%
+  }%
+%    \end{macrocode}
+% This |\let| makes the result global if |#1| is |\global|:
+%    \begin{macrocode}
+  #1\let#3#3%
+  \let\lstp@def@temp\@undefined
+}
+%    \end{macrocode}
+% \end{macros}
+%
+% \subsection{Basic Imperative List Commands}
+% \begin{macros}{lstp@ta,lstp@tb}
+% Token registers for list operations.
+%    \begin{macrocode}
+\newtoks\lstp@ta
+\newtoks\lstp@tb
+%    \end{macrocode}
+% \end{macros}
+% \begin{macros}{ConsTo,gConsTo,eConsTo,xConsTo}
+% The |\ConsTo| family of macros are defined in terms of the lower-level
+% |\@lstp@ConsTo| macro, which takes two extra arguments: The first is a
+% modifier that may be |\global| for global effect, and the second
+% specifies which version of |\def| to use:
+%    \begin{macrocode}
+\newcommand\ConsTo{\@lstp@ConsTo\relax\def}
+\newcommand\gConsTo{\@lstp@ConsTo\global\def}
+\newcommand\eConsTo{\@lstp@ConsTo\relax\edef}
+\newcommand\xConsTo{\@lstp@ConsTo\global\edef}
+%    \end{macrocode}
+% \end{macros}
+% \begin{macro}{\@lstp@ConsTo}
+% The low-level implementation of |\ConsTo|.
+%    \begin{macrocode}
+\newcommand\@lstp@ConsTo[4]{%
+%    \end{macrocode}
+% We define a temporary macro to be the item to cons, which may expand
+% the item if |#2| is |\edef|.
+%    \begin{macrocode}
+  \long#2\lstp@temp{#3}%
+  \lstp@ta=\expandafter{\expandafter\listitem\expandafter{\lstp@temp}}%
+  \lstp@tb=\expandafter{#4}%
+  #1\edef#4{\the\lstp@ta\the\lstp@tb}%
+}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macros}{SnocTo,gSnocTo,eSnocTo,xSnocTo}
+% Similarly, the |\SnocTo| family is defined in terms of the lower-level
+% |\@lstp@SnocTo|:
+%    \begin{macrocode}
+\newcommand\SnocTo{\@lstp@SnocTo\relax\def}
+\newcommand\gSnocTo{\@lstp@SnocTo\global\def}
+\newcommand\eSnocTo{\@lstp@SnocTo\relax\edef}
+\newcommand\xSnocTo{\@lstp@SnocTo\global\edef}
+%    \end{macrocode}
+% \end{macros}
+% \begin{macro}{\@lstp@SnocTo}
+% Like |\@lstp@ConsTo|, but appends the result in the other order.
+%    \begin{macrocode}
+\newcommand\@lstp@SnocTo[4]{%
+  \long#2\lstp@temp{#3}%
+  \lstp@ta=\expandafter{\expandafter\listitem\expandafter{\lstp@temp}}%
+  \lstp@tb=\expandafter{#4}%
+  #1\edef#4{\the\lstp@tb\the\lstp@ta}%
+}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macros}{AppendTo,gAppendTo,@lstp@AppendTo}
+% As with |\ConsTo| and |\SnocTo|, we define these in terms of a
+% lower-level macro that takes |\global| as an argument.
+%    \begin{macrocode}
+\newcommand\AppendTo{\@lstp@AppendTo\relax}
+\newcommand\gAppendTo{\@lstp@AppendTo\global}
+\newcommand\@lstp@AppendTo[3]{%
+  \lstp@ta=\expandafter{#2}%
+  \lstp@tb=\expandafter{#3}%
+  #1\edef#3{\the\lstp@ta\the\lstp@tb}%
+}
+%    \end{macrocode}
+% \end{macros}
+% \begin{macros}{@LopOff}
+% The key to taking lists apart is |\@LopOff|, which uses \TeX's pattern
+% matching to find the first item in a list.  In particular, we give
+% |\@LopOff| the contents of a list, followed by |\@LopOff| to
+% mark the end, and then parameters |#3| and |#4| tell us what to do to
+% the first and the rest of the list.  Then |\@LopOff| pattern matches
+% the first list item and the rest of the list and passes the results to
+% |#3| and |#4|:
+%    \begin{macrocode}
+\long\def\@LopOff\listitem#1#2\@LopOff#3#4{%
+  #3{#1}%
+  #4{#2}%
+}
+%    \end{macrocode}
+% \end{macros}
+% \begin{macros}{@lstp@LopTo,@lstp@RestTo}
+% These are the low level commands for grabbing the first or rest of a
+% list and sending it somewhere.  Each uses |\@LopOff| to get the first
+% and the rest, but passes it different continuations.  |\@lsp@LopTo|
+% passes it arguments that will |\def| its third and fourth arguments to
+% be the first and rest of the lopped list, using global modifiers |#1|
+% and |#2|. On the other hand, |\@lstp@RestTo| ignores the first of the
+% list and just defines its third argument to be the rest.
+%    \begin{macrocode}
+\newcommand\@lstp@LopTo[4]{\expandafter\@LopOff#3\@LopOff{#1\def#4}{#2\def#3}}
+\newcommand\@lstp@RestTo[3]{\expandafter\@LopOff#2\@LopOff{\@gobble}{#1\def#3}}
+%    \end{macrocode}
+% \end{macros}
+% \begin{macros}{LopTo,gLopTo,glLopTo,lgLopTo}
+% The |\LopTo| family is defined in terms of |\@lstp@LopTo|.
+%    \begin{macrocode}
+\newcommand\LopTo{\@lstp@LopTo\relax\relax}
+\newcommand\gLopTo{\@lstp@LopTo\global\global}
+\newcommand\glLopTo{\@lstp@LopTo\global\relax}
+\newcommand\lgLopTo{\@lstp@LopTo\relax\global}
+%    \end{macrocode}
+% \end{macros}
+% \begin{macros}{FirstTo,gFirstTo,RestTo,gRestTo}
+% The |\FirstTo| family is defined in terms of |\@lstp@LopTo|,
+% and the |\RestTo| family is defined using |\@lstp@RestTo|.
+%    \begin{macrocode}
+\newcommand\FirstTo{\@lstp@LopTo\relax\@gobblethree}
+\newcommand\gFirstTo{\@lstp@LopTo\global\@gobblethree}
+\newcommand\RestTo{\@lstp@RestTo\relax}
+\newcommand\gRestTo{\@lstp@RestTo\global}
+%    \end{macrocode}
+% \end{macros}
+%
+% \subsection{Control and Higher-Order List Commands}
+%
+% \begin{macros}{IfList,@IfList}
+% To detect if a macro is a list, we expand it and pass it to
+% |\@IfList|, which grabs the first word or group in the macro and
+% compares it to |\listitem|.
+%    \begin{macrocode}
+\newcommand*\IfList[1]{%
+  {%
+  \expandafter\@IfList#1\@IfList
+  }%
+}
+\def\@IfList#1#2\@IfList{%
+  \ifx\listitem#1\relax
+    \aftergroup\@firstoftwo
+  \else
+    \aftergroup\@secondoftwo
+  \fi
+}
+%    \end{macrocode}
+% \end{macros}
+% \begin{macros}{@forList}
+% To iterate over a list, we define |\listitem| to be the visitor for
+% each element and then evaluate the list.  However, because the visitor
+% may also do list operations, including redefining |\listitem|, we
+% define another macro, |\listp@for@listitem| as the actual visitor, and
+% then realias |\listitem| to that at each iteration.
+%    \begin{macrocode}
+\def\@forList#1:=#2\do#3{%
+  \long\def\lstp@for@listitem##1{%
+    \long\def#1{##1}%
+    #3%
+    \let\listitem\lstp@for@listitem%
+  }%
+  \let\listitem\lstp@for@listitem%
+  #2%
+  \let\listitem\@undefined%
+}
+%    \end{macrocode}
+% \end{macros}
+% \begin{macros}{setToListLength,lstp@length}
+% The high-level |\setToListLength| command delegates to the lower-level
+% |\lstp@length|, which defines |\listitem| to ignore its argument and
+% increment a counter.
+%    \begin{macrocode}
+\newcommand\SetToListLength[2]{%
+  \lstp@length{#2}{\value{#1}}%
+}
+\newcommand\lstp@length[2]{%
+  #2=0 %
+  \long\def\listitem##1{\advance#2 by1 }%
+  #1\let\listitem\@undefined%
+}
+%    \end{macrocode}
+% \end{macros}
+% \begin{macros}{MapListTo,gMapListTo,MapAndAppendTo,gMapAndAppendTo}
+% The mapping commands are defined, as usual, in terms of a lower level
+% command that takes a parameter that specifies whether to make a global
+% definition or not.
+%    \begin{macrocode}
+\newcommand\MapListTo{\@lstp@MapListTo\relax}
+\newcommand\gMapListTo{\@lstp@MapListTo\global}
+\newcommand\MapAndAppendTo{\@lstp@MapAndAppendTo\relax}
+\newcommand\gMapAndAppendTo{\@lstp@MapAndAppendTo\global}
+%    \end{macrocode}
+% \end{macros}
+% \begin{macros}{@lstp@MapListTo}
+% Here we delegate to |\@lstp@MapAndAppendTo| to do the actual
+% iteration. The main work here is to save the contents of the source
+% list before we clear the destination list, in case they're the same
+% list.  Then we map-and-append the copy of the source list to the
+% now-empty destination.
+%    \begin{macrocode}
+\newcommand\@lstp@MapListTo[4]{%
+  \let\lstp@map@temp#3%
+  #1\let#4\empty%
+  \@lstp@MapAndAppendTo{#1}{#2}\lstp@map@temp#4%
+  \let\lstp@map@temp\@undefined%
+}
+%    \end{macrocode}
+% \end{macros}
+% \begin{macros}{@lstp@MapAndAppendTo}
+% We define |\listitem| to add the map expression for each element to
+% the end of the list.
+%    \begin{macrocode}
+\newcommand\@lstp@MapAndAppendTo[4]{%
+  \long\def\listitem##1{\@lstp@SnocTo{#1}\def{#2}{#4}}%
+  #3%
+  \let\listitem\@undefined%
+}
+%    \end{macrocode}
+% \end{macros}
+% \subsubsection{Sorting}
+% \begin{macros}{lstp@insert}
+% For sorting, we use an insertion sort, since that's easy to define
+% recursively using the list operations that we have thus far.  First,
+% we define the insert function, which takes as arguments the element to
+% insert, the key projection, and a list to insert it into.
+%    \begin{macrocode}
+\newcommand\lstp@insert[3]{%
+%    \end{macrocode}
+% Get the sorting key for the new item:
+%    \begin{macrocode}
+  \edef\lstp@insert@temp@a{#2{#1}}%
+%    \end{macrocode}
+% Save the input so we can use the same macro for output, and
+% then clear the output:
+%    \begin{macrocode}
+  \let\lstp@insert@temp@i#3%
+  \let#3\empty
+%    \end{macrocode}
+% We define two macros for looping, one which checks and inserts if
+% necessary, and the other which assumes insertion has happened:
+%    \begin{macrocode}
+  \long\def\lstp@insert@listitem##1{%
+%    \end{macrocode}
+% Compute the key of the item to compare against, and then do the
+% comparison.
+%    \begin{macrocode}
+    \edef\lstp@insert@temp@b{#2{##1}}%
+    \ifnum\lstp@insert@temp@a<\lstp@insert@temp@b
+%    \end{macrocode}
+% If the item-to-insert should be inserted here, then we add it to the
+% end of the list and redefine |\listitem| to insert without checking
+% for here on out, which will insert the rest of the list after the new
+% element.
+%    \begin{macrocode}
+      \SnocTo{#1}{#3}%
+      \let\listitem\lstp@insert@listitem@done
+    \else
+%    \end{macrocode}
+% Otherwise, it's not time to insert it yet, so we just define list item
+% to do this check again the next time around:
+%    \begin{macrocode}
+      \let\listitem\lstp@insert@listitem
+    \fi
+%    \end{macrocode}
+% Add the next item in the input list to the end of the output list.
+%    \begin{macrocode}
+    \SnocTo{##1}{#3}%
+  }%
+%    \end{macrocode}
+% This is what we set |\listitem| to once we've inserted the
+% item-to-add, so that it just adds the rest of the items one by one.
+%    \begin{macrocode}
+  \long\def\lstp@insert@listitem@done##1{\SnocTo{##1}{#3}}%
+%    \end{macrocode}
+% Initially, |\listitem| should compare the new item against each old
+% item, so we define |\listitem| to be that function, and then run the
+% loop by evaluating the (copy of the) input list.
+%    \begin{macrocode}
+  \let\listitem\lstp@insert@listitem
+  \lstp@insert@temp@i%
+%    \end{macrocode}
+% If we haven't inserted the new item yet by the end of the loop, we
+% need to add it at the end:
+%    \begin{macrocode}
+  \ifx\listitem\lstp@insert@listitem%
+    \SnocTo{#1}{#3}%
+  \fi%
+%    \end{macrocode}
+% Cleanup:
+%    \begin{macrocode}
+  \let\lstp@insert@temp@i\@undefined%
+  \let\listitem\@undefined%
+}
+%    \end{macrocode}
+% \end{macros}
+% \begin{macros}{SortList,@apply@group}
+% Once the single insertion command is defined, the insertion sort
+% itself is straightforward.  As the default key projection, we use
+% |\@apply@group{}|, which merely removes the braces around the
+% argument, which is sufficient to make something like |{5}| suitable
+% for numeric comparison.
+%    \begin{macrocode}
+\providecommand\@apply@group[2]{#1#2}
+\newcommand\SortList[2][\@apply@group{}]{%
+%    \end{macrocode}
+% Save the input so we can use the same macro for output, and
+% then clear the output:
+%    \begin{macrocode}
+  \let\lstp@sort@temp@i#2%
+  \let#2\empty
+%    \end{macrocode}
+% For each item, insert it into the output. We redefine |\listitem| each
+% time because |\lstp@insert| changes it.
+%    \begin{macrocode}
+  \long\def\lstp@sort@listitem##1{%
+    \lstp@insert{##1}{#1}{#2}%
+    \let\listitem\lstp@sort@listitem
+  }%
+  \let\listitem\lstp@sort@listitem
+%    \end{macrocode}
+% Run the loop and cleanup.
+%    \begin{macrocode}
+  \lstp@sort@temp@i
+  \let\lstp@sort@temp@i\@undefined
+  \let\listitem\@undefined
+}
+%    \end{macrocode}
+% \end{macros}
+%
+% \subsubsection{Compressing}
+%
+% \begin{macros}{c@lstp@ifsucc,lstp@ifsucc}
+% To compress ranges, we need to determine if one integer is the
+% successor of another.
+%    \begin{macrocode}
+\newcounter{lstp@ifsucc}
+\newcommand\lstp@ifsucc[2]{%
+  \setcounter{lstp@ifsucc}{#1}%
+  \addtocounter{lstp@ifsucc}{1}%
+  \ifnum#2=\value{lstp@ifsucc}%
+    \let\@lstp@ifsucc@kont\@firstoftwo
+  \else
+    \let\@lstp@ifsucc@kont\@secondoftwo
+  \fi
+  \@lstp@ifsucc@kont
+}
+%    \end{macrocode}
+% \end{macros}
+% \begin{macros}{CompressList}
+% List compression works like a state machine. State \emph{start},
+% represented by the command |\lstp@compress@listitem@start|, is the 
+% starting state where we initialize the first value in the list.  When
+% we aren't in a range, we stay in the \emph{single} state, which
+% compares the next item to the previous item and determines whether we
+% have a duplicate (stay in \emph{single}, but drop it), and
+% non-successor (stay in \emph{single}, and output the previous item),
+% or the previous items successor (go to \emph{range}, and no output).
+% In the \emph{range} state, we remember the start and end of the range,
+% and compare the next item in the input list to the end of the range.
+% The logic is similar to the \emph{single} state: when we see a
+% jump, we output the range and go back to \emph{single}, and when we
+% see a successor (or repeat), we extend (or leave alone) the current
+% range.
+%    \begin{macrocode}
+\newcommand\CompressList[2][\@apply@group{}]{%
+%    \end{macrocode}
+% Save the input so we can use the same macro for output, and
+% clear the output:
+%    \begin{macrocode}
+  \let\lstp@compress@temp@i#2%
+  \let#2\empty
+%    \end{macrocode}
+% These are helper commands to add a single item or range to the list:
+%    \begin{macrocode}
+  \def\lstp@compress@add@single{%
+    \expandafter\SnocTo\expandafter
+    {\expandafter\@single\expandafter{\lstp@compress@temp@a}}{#2}%
+  }%
+  \def\lstp@compress@add@range{%
+    \expandafter\expandafter\expandafter\SnocTo
+    \expandafter\expandafter\expandafter{%
+    \expandafter\expandafter\expandafter\@range
+    \expandafter\expandafter\expandafter{%
+    \expandafter\lstp@compress@temp@a\expandafter}%
+    \expandafter{\lstp@compress@temp@b}}#2%
+  }%
+%    \end{macrocode}
+% The state machine states are |\listitem| callbacks. The first state is
+% \emph{start}, which saves the first item in |\lstp@compress@temp@a|
+% (henceforce |a|) and its key in |\lstp@compress@temp@a@key|
+% (henceforce |a@key|).  It then transitions to the \emph{single} state.
+%    \begin{macrocode}
+  \long\def\lstp@compress@listitem@start##1{%
+    \def\lstp@compress@temp@a{##1}%
+    \edef\lstp@compress@temp@a@key{#1{##1}}%
+    \let\listitem\lstp@compress@listitem@single
+  }%
+%    \end{macrocode}
+% In the \emph{single} state, we set |b| and |b@key| to the next item and its
+% key. We then compare the keys. If they're the same, we drop |b| on the
+% floor and stay in this state. If |b@key| is the successor of |a@key|,
+% then we transition to the \emph{range} state. Otherwise, we output |a|
+% as a singleton and let |a| be |b| for the next iteration.
+%    \begin{macrocode}
+  \long\def\lstp@compress@listitem@single##1{%
+    \def\lstp@compress@temp@b{##1}%
+    \edef\lstp@compress@temp@b@key{#1{##1}}%
+    \ifnum\lstp@compress@temp@a@key=\lstp@compress@temp@b@key
+      \let\listitem\lstp@compress@listitem@single
+    \else
+      \lstp@ifsucc{\lstp@compress@temp@a@key}{\lstp@compress@temp@b@key}
+        {\let\listitem\lstp@compress@listitem@range}
+        {\lstp@compress@add@single
+         \let\lstp@compress@temp@a\lstp@compress@temp@b
+         \let\lstp@compress@temp@a@key\lstp@compress@temp@b@key
+         \let\listitem\lstp@compress@listitem@single}%
+    \fi
+  }%
+%    \end{macrocode}
+% In the \emph{range} state, |a| is the start of the range and |b| is
+% the end. We set |c| and |c@key| to the next item, and compare it to
+% |b@key|. If they're the same, we discard |c| and stay in the same state.
+% If |c@key| is the success of |b@key|, then |c| is the new upper bound
+% of the range, so we let |b| be |c| for the next iteration. Otherwise,
+% we've found the end of a range, so we output the range |a| to |b|, and
+% transition back \emph{single}, letting |a| be |c| for the next
+% iteration.
+%    \begin{macrocode}
+  \long\def\lstp@compress@listitem@range##1{%
+    \def\lstp@compress@temp@c{##1}%
+    \edef\lstp@compress@temp@c@key{#1{##1}}%
+    \ifnum\lstp@compress@temp@b@key=\lstp@compress@temp@c@key
+      \let\listitem\lstp@compress@listitem@range
+    \else
+      \lstp@ifsucc{\lstp@compress@temp@b@key}{\lstp@compress@temp@c@key}
+        {%
+          \let\lstp@compress@temp@b\lstp@compress@temp@c
+          \let\lstp@compress@temp@b@key\lstp@compress@temp@c@key
+          \let\listitem\lstp@compress@listitem@range
+        }
+        {%
+          \lstp@compress@add@range
+          \let\lstp@compress@temp@a\lstp@compress@temp@c
+          \let\lstp@compress@temp@a@key\lstp@compress@temp@c@key
+          \let\listitem\lstp@compress@listitem@single
+        }%
+    \fi
+  }%
+%    \end{macrocode}
+% We start in state \emph{start} and go run the loop:
+%    \begin{macrocode}
+  \let\listitem\lstp@compress@listitem@start
+  \lstp@compress@temp@i
+%    \end{macrocode}
+% When the loop terminates, if we were in \emph{single}, we still need
+% to output the single item |a|; if we were in \emph{range}, we need to
+% output the range |a| to |b|.
+%    \begin{macrocode}
+  \ifx\listitem\lstp@compress@listitem@single
+    \lstp@compress@add@single
+  \else
+    \ifx\listitem\lstp@compress@listitem@range
+      \lstp@compress@add@range
+    \fi
+  \fi
+%    \end{macrocode}
+% Cleanup:
+%    \begin{macrocode}
+  \let\lstp@compress@temp@a\@undefined
+  \let\lstp@compress@temp@b\@undefined
+  \let\lstp@compress@temp@c\@undefined
+  \let\lstp@compress@temp@a@key\@undefined
+  \let\lstp@compress@temp@b@key\@undefined
+  \let\lstp@compress@temp@c@key\@undefined
+  \let\lstp@compress@temp@i\@undefined
+  \let\listitem\@undefined
+}
+%    \end{macrocode}
+% \end{macros}
+%
+% \subsection{Nice List Printing}
+%
+% \begin{macros}{FormatListSepTwo,FormatListSepMore,FormatListSepLast}
+% The default values for the list printing separators.
+%    \begin{macrocode}
+\newcommand\FormatListSepTwo{ and }
+\newcommand\FormatListSepMore{, }
+\newcommand\FormatListSepLast{, and }
+%    \end{macrocode}
+% \end{macros}
+%    \begin{macrocode}
+%    \end{macrocode}
+% \begin{macros}{c@lstp@FormatList@length,c@lstp@FormatList@posn}
+% We use two counters for formatting a list: one for the whole length,
+% and the other to keep track of the current position.
+%    \begin{macrocode}
+\newcounter{lstp@FormatList@length}
+\newcounter{lstp@FormatList@posn}
+%    \end{macrocode}
+% \end{macros}
+% \begin{macros}{FormatList}
+% The list formatting macro:
+%    \begin{macrocode}
+\newcommand\FormatList[4]{{%
+%    \end{macrocode}
+% Break the comma-separated input into a list and count it.
+% Initialize the position counter to 0.
+%    \begin{macrocode}
+  \deflist\lstp@FormatList@list{#4}%
+  \SetToListLength{lstp@FormatList@length}\lstp@FormatList@list%
+  \setcounter{lstp@FormatList@posn}{0}%
+%    \end{macrocode}
+% Introduce the list, using |#1| for singular or |#2| for plural:
+%    \begin{macrocode}
+  \ifnum\value{lstp@FormatList@length}=1%
+    #1%
+  \else%
+    #2%
+  \fi%
+%    \end{macrocode}
+% What do to for each item---a decision tree:
+%    \begin{macrocode}
+  \def\listitem##1{%
+    \addtocounter{lstp@FormatList@posn}{1}%
+    \ifnum1<\value{lstp@FormatList@posn}%
+      \ifnum2=\value{lstp@FormatList@length}%
+        \FormatListSepTwo
+      \else
+        \ifnum\value{lstp@FormatList@length}=\value{lstp@FormatList@posn}%
+          \FormatListSepLast
+        \else
+          \FormatListSepMore
+        \fi
+      \fi
+    \fi
+    #3{##1}%
+  }%
+%    \end{macrocode}
+% Run the loop:
+%    \begin{macrocode}
+  \lstp@FormatList@list
+}}
+%    \end{macrocode}
+% \end{macros}
+%
+% \subsection{Function List Expressions}
+%
+% \begin{macros}{ListExpr,ListExprTo,gListExprTo}
+% The main list expressiom commands are defined in terms of
+% |\@lstp@ListExpr|, which takes a list expression and a continuation
+% for its result.
+%    \begin{macrocode}
+\newcommand\ListExpr[1]{\@lstp@ListExpr{#1}\relax}
+\newcommand\ListExprTo[2]{\@lstp@ListExpr{#1}{\def#2}}
+\newcommand\gListExprTo[2]{\@lstp@ListExpr{#1}{\gdef#2}}
+%    \end{macrocode}
+% \end{macros}
+% \begin{macros}{@lstp@defbinop,@lstp@defunop,@lstp@definplaceunopopt}
+% These are helper macros for turning imperative list operations into
+% the function list operations for expressions. For example,
+% |\@lstp@defbinop|\marg{new-op}\marg{old-op} defines \meta{new-op} to
+% be a two-argument list expression function, given \meta{old-op}, which
+% is a two-argument list operation that redefines its second argument to
+% be its result. Similarly, |\@lstp@defunop| is helpful for defining
+% unary list expression functions. Finally |\@lstp@definplaceunopopt| is
+% for defining unary operations in terms of imperative unary operations
+% that return their result in place and return an optional argument.
+% This selection of helpers isn't particularly general, but it handles
+% the three necessary cases below.
+%
+% Each of these depends on an |\Eval| operation, which given a list
+% expression, evaluates it and globally defines |\@lstp@acc| to be the
+% result. Thus, to evaluate a binary operation, we evaluate the first
+% operand, then save the result in a temporary, then evaluate the second
+% operand, and then apply the operation to the temporary and the global
+% accumulator.  We do the second operand in a new group, so that it
+% doesn't overwrite the temporary. (The protocol is such that changes to
+% the temporary must be local.)
+%    \begin{macrocode}
+\newcommand\@lstp@defbinop[2]{%
+  \newcommand#1[2]{%
+    \Eval{##1}\let\@lstp@tmp\@lstp@acc
+    {\Eval{##2}}%
+    #2\@lstp@tmp\@lstp@acc
+  }%
+}
+\newcommand\@lstp@defunop[2]{%
+  \newcommand#1[1]{%
+    \Eval{##1}%
+    #2\@lstp@acc\@lstp@acc
+  }%
+}
+\newcommand\@lstp@definplaceunopopt[3][]{%
+  \newcommand#2[2][#1]{%
+    \Eval{##2}%
+    #3[##1]\@lstp@acc
+    \global\let\@lstp@acc\@lstp@acc
+  }%
+}
+%    \end{macrocode}
+% \end{macros}
+% \begin{macros}{@lstp@ListExpr}
+% Evaluating an expression mostly comes down to defining all the list
+% expression functions and then recursively evaluating.
+%    \begin{macrocode}
+\newcommand\@lstp@ListExpr[2]{%
+  {%
+    \gdef\@lstp@acc{}%
+%    \end{macrocode}
+% |\Eval| is the main evaluator, which dispatches on whether we're
+% looking at a list macro, one of the list expression operations, or
+% some other arbitrary text. In the first case, it sets the accumulator
+% to the list macro. If we have a list expression operation, it
+% dispatches to that by evaluating it directly. Otherwise, it expands
+% the argument and saves it in the accumulator.
+%    \begin{macrocode}
+    \def\Eval##1{%
+      \IfList{##1}{%
+        \global\let\@lstp@acc##1%
+      }{%
+        \@lstp@ifListOp##1\@lstp@ifListOp{%
+          ##1%
+        }{%
+          \xdef\@lstp@acc{##1}%
+        }%
+      }%
+    }%
+%    \end{macrocode}
+% Here we define the list expression operations:
+%    \begin{macrocode}
+    \def\Q##1{\gdef\@lstp@acc{##1}}%
+    \def\Nil{\global\let\@lstp@acc\empty}%
+    \def\List##1{\gdeflist\@lstp@acc{##1}}%
+    \@lstp@defbinop\Cons\xConsTo
+    \@lstp@defbinop\Snoc\xSnocTo
+    \@lstp@defunop\First\gFirstTo
+    \@lstp@defunop\Rest\gRestTo
+    \@lstp@defbinop\Append\gAppendTo
+    \@lstp@definplaceunopopt[\@apply@group{}]\Sort\SortList
+    \@lstp@definplaceunopopt[\@apply@group{}]\Compress\CompressList
+    \newcommand\Map[2]{%
+      \Eval{##2}%
+      \gMapListTo{##1}\@lstp@acc\@lstp@acc
+    }%
+%    \end{macrocode}
+% Start evaluating at the root:
+%    \begin{macrocode}
+    \Eval{#1}%
+  }%
+%    \end{macrocode}
+% Call the continuation |#2| with the result:
+%    \begin{macrocode}
+  \def\@lstp@finish##1{#2{##1}}%
+  \expandafter\@lstp@finish\expandafter{\@lstp@acc}%
+}
+%    \end{macrocode}
+% \end{macros}
+% \begin{macros}{@lstp@ifListOp}
+% To test whether a sequence of tokens represents a list expression
+% functions, we
+% check whether the first token is in a list of known list
+% expresson functions:
+%    \begin{macrocode}
+\def\@lstp@ifListOp#1#2\@lstp@ifListOp{%
+  \@lstp@ifInToks#1{
+    \Q\Nil\List\Cons\Snoc\Append
+    \First\Rest\Sort\Compress\Map
+  }
+}
+%    \end{macrocode}
+% \end{macros}
+% \begin{macros}{@lstp@ifInToks}
+% We use \TeX's pattern matching to determine whether |#1| is present in
+% |#2|:
+%    \begin{macrocode}
+\newcommand\@lstp@ifInToks[2]{%
+  {%
+    \def\@tester##1#1##2\@tester{%
+      \ifx\@notfound##2\relax
+        \aftergroup\@secondoftwo
+      \else
+        \aftergroup\@firstoftwo
+      \fi
+    }%
+    \@tester#2\@lstp@ifInToks#1\@notfound\@tester
+  }%
+}
+%    \end{macrocode}
+% \end{macros}
+% \Finale
+\endinput
