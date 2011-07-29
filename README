@@ -1,26 +1,34 @@
 The listproc Package
 
-To build the PDF documentation and style file, merely run
+SYNOPSIS
 
-    % make
+    This package provides a variety of list processing macros, including
+    sorting, compressing ranges, mapping and iteration. Several of my
+    other packages (ottalt, plstx, pfsteps) depend on listproc.
 
-If you don't have make, it's possible to do it manually.  To create the
-style file (listproc.sty) and the documentation (listproc.pdf), run the
-following sequence of commands:
+BUILDING
 
-    latex listproc.ins
-    latex listproc.dtx
-    makeindex -s gind.ist listproc.idx
-    makeindex -s gglo.ist -o listproc.gls listproc.glo
-    latex listproc.dtx
-    pdflatex listproc.dtx
+    To build the PDF documentation and style file, merely run
 
-If you only want to build the style file, and not the documentation,
-only the first command (latex listproc.ins) is necessary.
+        % make
 
-The documentation is also available on the web at
-http://www.ccs.neu.edu/home/tov/code/latex/
+    If you don't have make, it's possible to do it manually.  To create
+    the style file (listproc.sty) and the documentation (listproc.pdf),
+    run the following sequence of commands:
+
+        latex listproc.ins
+        latex listproc.dtx
+        makeindex -s gind.ist listproc.idx
+        makeindex -s gglo.ist -o listproc.gls listproc.glo
+        latex listproc.dtx
+        pdflatex listproc.dtx
+
+    If you only want to build the style file, and not the documentation,
+    only the first command (latex listproc.ins) is necessary.
+
+    The documentation is also available on the web at
+    http://www.ccs.neu.edu/home/tov/code/latex/
 
 Jesse A. Tov
 tov@ccs.neu.edu
-Fri Jul 29 15:41:15 EDT 2011
+Fri, 29 Jul 2011 15:49:58 -0400
