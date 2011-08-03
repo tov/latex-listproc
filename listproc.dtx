@@ -21,17 +21,17 @@
 %
 %   *** The package file:
 %<package>\NeedsTeXFormat{LaTeX2e}[1999/12/01]
-%<package>\ProvidesPackage{listproc}[2011/03/26 v0.1 (list processing)]
+%<package>\ProvidesPackage{listproc}[2011/08/03 v0.2 (list processing)]
 %
 %   *** The driver file:
 %<driver>\NeedsTeXFormat{LaTeX2e}
 %
 %   *** date, version, and stuff:
 %\fi
-%\ProvidesFile{listproc}[2011/03/26 v0.1 (list processing)]
+%\ProvidesFile{listproc}[2011/08/03 v0.2 (list processing)]
 % \changes{v0.1}{2011/03/26}{Initial documented release}
 %
-% \CheckSum{0}
+% \CheckSum{681}
 % \CharacterTable
 %  {Upper-case    \A\B\C\D\E\F\G\H\I\J\K\L\M\N\O\P\Q\R\S\T\U\V\W\X\Y\Z
 %   Lower-case    \a\b\c\d\e\f\g\h\i\j\k\l\m\n\o\p\q\r\s\t\u\v\w\x\y\z
@@ -505,9 +505,13 @@
 % of the output macro:
 %    \begin{macrocode}
   \@for\lstp@def@temp:=#4\do{%
-    \eSnocTo\lstp@def@temp#3%
+    \expandafter\SnocTo\expandafter{\lstp@def@temp}#3%
   }%
 %    \end{macrocode}
+% \changes{v0.2}{2011/08/03}{
+%   Fixed bug in \usemacro{deflist} and friends, which were expanding
+%   the contents of the initializer list, and shouldn't be.
+% }
 % This |\let| makes the result global if |#1| is |\global|:
 %    \begin{macrocode}
   #1\let#3#3%
